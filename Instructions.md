@@ -1,6 +1,6 @@
 # Coursework
 
-This repository is for the submission of your coursework for the S1 Principles of Data Science module. 
+This repository is for the submission of your coursework for the S1 Principles of Data Science module.
 
 You have been given access with the role of "Maintainer" for this repository which will expire on the 17th of December at midnight, which is the submission deadline for this work.
 
@@ -62,14 +62,14 @@ You may wish to further partition this into subsections, for example
 - Introduction
 - Methodology
 - Analysis
-- Discussion 
+- Discussion
 
-There are several ways to solve this problem and produce a sensible result. 
+There are several ways to solve this problem and produce a sensible result.
 It is more important that you explain and justify your approach, and submit suitable code to perform the task, than it is to get the answer "right".
 
-Both your code **and** your report should be submitted in this repository. 
+Both your code **and** your report should be submitted in this repository.
 The generated PDF of your report should be placed in the `report` subdirectory.
 The `README.md` file should contain short and simple instructions on how to run your code.
-Please **make sure** your code is portable and reproducible by utilising environment and containerisation tools like Conda and Docker. 
+Please **make sure** your code is portable and reproducible by utilising environment and containerisation tools like Conda and Docker.
 The code should be runnable in the container without any effort beyond generating the image.
-I will not attempt to debug your code if it does not run first time.  
+I will not attempt to debug your code if it does not run first time.
