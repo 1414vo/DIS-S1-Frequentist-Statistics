@@ -1,0 +1,17 @@
+name: base
+channels:
+  - conda-forge
+dependencies:
+  - python==3.9.18
+  - conda==23.10.0
+  - setuptools
+  - pip
+  - wheel
+  - conda-content-trust
+  - conda-libmamba-solver
+  - numpy
+  - pre-commit
+  - pytest
+  - pandas
+  - doxygen
+prefix: /opt/conda
