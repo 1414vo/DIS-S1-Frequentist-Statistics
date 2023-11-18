@@ -77,7 +77,7 @@ def normalization_constant(
         / 2
         * (erf((beta - mu) / (root_2 * sigma)) - erf((alpha - mu) / (root_2 * sigma)))
     )
-    exponential_component = (1 - f) * (math.exp(-lam * alpha) - math.exp(-lam * alpha))
+    exponential_component = (1 - f) * (math.exp(-lam * alpha) - math.exp(-lam * beta))
 
     return 1 / (normal_component + exponential_component)
 
