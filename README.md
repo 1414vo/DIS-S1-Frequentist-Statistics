@@ -29,6 +29,15 @@ Afterwards, any time you want to use the code, you can launch a Docker container
 
 ## Running the scripts
 
+### Part (c)
+
+In order to run the script for the relevant part, execute the following command while still in the main project directory:
+`python -m src.runnable_scripts.part_c_check <config_file>`
+A sample configuration file can be found in the `configs` folder. If a configuration is not specified, the default one will be used. If executed correctly, the program should return a list of parameters settings and the evaluated area for the pdf. If correctly implemented, all should return a value close to 1, showing a normalized probability function.
+
+### Part (d)
+
+
 ## Features
 
 ## Frameworks
