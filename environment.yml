@@ -9,9 +9,10 @@ dependencies:
   - wheel
   - conda-content-trust
   - conda-libmamba-solver
+  - doxygen
   - numpy
+  - pandas
   - pre-commit
   - pytest
-  - pandas
-  - doxygen
+  - scipy
 prefix: /opt/conda
