@@ -5,9 +5,9 @@ r"""! @file distribution.py
     detailed in the assignment. This includes checking whether the input parameters
     are valid, computing the normalization constant, or obtaining the pdf.
     The distribution pdf is given by:
-    \(p^\prime(M; f,\lambda,\mu,\sigma,\alpha,\beta) = N(\alpha, \beta) \times
-    (fs(M;\mu, \sigma) + (1-f)b(M; \lambda))\),
-    where $N(\alpha, \beta) is a normalization constant.$
+    \f$p^\prime(M; f,\lambda,\mu,\sigma,\alpha,\beta) = N(\alpha, \beta) \times
+    (fs(M;\mu, \sigma) + (1-f)b(M; \lambda))\f$,
+    where \f$N(\alpha, \beta)\f$ is a normalization constant.
 
 @author Created by I. Petrov on 18/11/2023
 """
@@ -26,7 +26,7 @@ def check_parameters(
 
     @param f        The fraction of the distribution attributed to the normal component.
                     Must be a real number between 0 and 1.
-    @param lam      The $\lambda$ parameter of the exponential distribution.
+    @param lam      The \f$\lambda\f$ parameter of the exponential distribution.
                     Must be a positive number.
     @param mu       The mean of the normal distribution.
     @param sigma    The standard deviation of the normal distribution. Must be positive.
@@ -57,11 +57,11 @@ def normalization_constant(
     f: float, lam: float, mu: float, sigma: float, alpha: float, beta: float
 ) -> float:
     r"""! Computes the normalization for the distribution
-    $p(M; f,\lambda,\mu,\sigma) = fs(M;\mu, \sigma) + (1-f)b(M; \lambda)$.
+    \f$p(M; f,\lambda,\mu,\sigma) = fs(M;\mu, \sigma) + (1-f)b(M; \lambda)\f$.
 
     @param f        The fraction of the distribution attributed to the normal component.
                     Must be a real number between 0 and 1.
-    @param lam      The $\lambda$ parameter of the exponential distribution.
+    @param lam      The \f$\lambda\f$ parameter of the exponential distribution.
                     Must be a positive number.
     @param mu       The mean of the normal distribution.
     @param sigma    The standard deviation of the normal distribution. Must be positive.
@@ -86,12 +86,12 @@ def distribution_pdf(
     M, f: float, lam: float, mu: float, sigma: float, alpha: float, beta: float
 ):
     r"""! Computes the normalization for the distribution
-    $p(M; f,\lambda,\mu,\sigma) = fs(M;\mu, \sigma) + (1-f)b(M; \lambda)$.
+    \f$p(M; f,\lambda,\mu,\sigma) = fs(M;\mu, \sigma) + (1-f)b(M; \lambda)\f$.
 
     @param M        A value or iterable of observations
     @param f        The fraction of the distribution attributed to the normal component.
                     Must be a real number between 0 and 1.
-    @param lam      The $\lambda$ parameter of the exponential distribution.
+    @param lam      The \f$\lambda\f$ parameter of the exponential distribution.
                     Must be a positive number.
     @param mu       The mean of the normal distribution.
     @param sigma    The standard deviation of the normal distribution. Must be positive.
