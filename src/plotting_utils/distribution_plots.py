@@ -18,6 +18,23 @@ from src.distribution_utils.distribution import (
 )
 
 
+def get_bins(X: np.ndarray, n_bins: int):
+    """! Obtains the density histogram properties for a sample with a given number of bins.
+
+    @param X        The sample array.
+    @param n_bins   The number of bins in the histogram.
+
+    @return         The bin values, error in values, bin centers, and bin widths."""
+    y, bins = np.histogram(X, bins=n_bins, density=True)
+    bin_centers = (bins[1:] + bins[:-1]) / 2
+    widths = np.diff(bins)
+
+    # Compute the corresponding error(on a normalized scale)
+    y_err = np.sqrt(y / (len(X) * widths))
+
+    return y, y_err, bin_centers, widths
+
+
 def plot_distribution_mix(
     f: float, lam: float, mu: float, sigma: float, alpha: float, beta: float
 ):
@@ -88,6 +105,52 @@ def plot_samples(
     samples = generate_sample(total_pdf, alpha, beta, N)
 
     plt.hist(samples, bins=50, label="Sample distribution", density=True)
+
+    plt.legend()
+    plt.show()
+
+
+def plot_mle(
+    sample: np.ndarray,
+    f: float,
+    lam: float,
+    mu: float,
+    sigma: float,
+    alpha: float,
+    beta: float,
+):
+    r"""! Plots the density of a sample versus the estimated distribution.
+
+    @param sample   The sample used for the estimation.
+    @param f        The estimated fraction of the distribution attributed to the normal component.
+                    Must be a real number between 0 and 1.
+    @param lam      The estimated \f$\lambda\f$ parameter of the exponential distribution.
+                    Must be a positive number.
+    @param mu       The estimated mean of the normal distribution.
+    @param sigma    The estimated standard deviation of the normal distribution. Must be positive.
+    @param alpha    The lower bound of the distribution. Must be non-negative.
+    @param beta     The upper bound of the distribution. Must be larger than alpha.
+    """
+
+    sns.set()
+    X = np.linspace(alpha, beta, 1000)
+
+    total_pdf = partial_pdf(f, lam, mu, sigma, alpha, beta)
+
+    plt.plot(X, total_pdf(X), label="Estimated probability distribution")
+
+    y, y_err, bin_centers, widths = get_bins(sample, n_bins=100)
+    plt.bar(
+        bin_centers,
+        y,
+        width=widths,
+        color="r",
+        yerr=y_err,
+        label="Sample distribution",
+        alpha=0.5,
+    )
+
+    plt.ylabel("Probability Density")
 
     plt.legend()
     plt.show()
