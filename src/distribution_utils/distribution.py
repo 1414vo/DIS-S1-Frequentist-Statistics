@@ -127,18 +127,23 @@ def partial_pdf(*args, **kwargs):
 
 
 def generate_sample(
-    pdf: Callable[[float], float], min_x: float, max_x: float, N: int = 100000
+    pdf: Callable[[float], float],
+    min_x: float,
+    max_x: float,
+    N: int = 100000,
+    random_seed: int = 0,
 ) -> np.ndarray:
     r"""! Creates a sample from a distribution using the accept-reject method.
 
-    @param pdf      The probability density function of the distribution.
-                    Must be normalized in the interval (min_x, max_x).
-    @param min_x    The lower bound of the interval.
-    @param max_x    The upper bound of the interval.
-    @param N        The number of samples to be generated.
-
-    @return         The generated sample.
+    @param pdf          The probability density function of the distribution.
+                        Must be normalized in the interval (min_x, max_x).
+    @param min_x        The lower bound of the interval.
+    @param max_x        The upper bound of the interval.
+    @param N            The number of samples to be generated.
+    @param random_seed  Random seed for random number generation.
+    @return             The generated sample.
     """
+    np.random.seed(seed=random_seed)
 
     max_value = optimize.brute(
         lambda X: -pdf(X), ranges=(slice(min_x, max_x, (max_x - min_x) / 1000),)
