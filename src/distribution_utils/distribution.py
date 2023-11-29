@@ -72,14 +72,16 @@ def normalization_constant(
 
     root_2 = 2**0.5
 
-    normal_component = (
-        f
-        / 2
-        * (erf((beta - mu) / (root_2 * sigma)) - erf((alpha - mu) / (root_2 * sigma)))
+    normal_component = 0.5 * (
+        erf((beta - mu) / (root_2 * sigma)) - erf((alpha - mu) / (root_2 * sigma))
     )
-    exponential_component = (1 - f) * (math.exp(-lam * alpha) - math.exp(-lam * beta))
+    exponential_component = (
+        (math.exp(-lam * alpha) - math.exp(-lam * beta))
+        if alpha >= 0
+        else (1 - math.exp(-lam * beta))
+    )
 
-    return 1 / (normal_component + exponential_component)
+    return normal_component, exponential_component
 
 
 def distribution_pdf(
@@ -101,9 +103,21 @@ def distribution_pdf(
     @return         The value of the pdf at a given point
                     (or multiple points if input is iterable).
     """
+    normal_constant, exponential_constant = normalization_constant(
+        f, lam, mu, sigma, alpha, beta
+    )
+
     normal_component = f * stats.norm.pdf(M, loc=mu, scale=sigma)
     exponential_component = (1 - f) * stats.expon.pdf(M, scale=1 / lam)
 
-    return (normal_component + exponential_component) * normalization_constant(
-        f, lam, mu, sigma, alpha, beta
+    return (
+        normal_component / normal_constant
+        + exponential_component / exponential_constant
     )
+
+
+def partial_pdf(*args, **kwargs):
+    r"""Generates a wrapper pdf from relevant parameters.
+
+    @return A partially instantiated pdf from a set of parameters."""
+    return lambda X: distribution_pdf(X, *args, **kwargs)
