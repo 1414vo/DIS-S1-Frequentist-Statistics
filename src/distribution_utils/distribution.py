@@ -13,8 +13,11 @@ r"""! @file distribution.py
 """
 
 import scipy.stats as stats
+import scipy.optimize as optimize
 from scipy.special import erf
 from functools import cache
+from typing import Callable
+import numpy as np
 import math
 import warnings
 
@@ -121,3 +124,38 @@ def partial_pdf(*args, **kwargs):
 
     @return A partially instantiated pdf from a set of parameters."""
     return lambda X: distribution_pdf(X, *args, **kwargs)
+
+
+def generate_sample(
+    pdf: Callable[[float], float], min_x: float, max_x: float, N: int = 100000
+) -> np.ndarray:
+    r"""! Creates a sample from a distribution using the accept-reject method.
+
+    @param pdf      The probability density function of the distribution.
+                    Must be normalized in the interval (min_x, max_x).
+    @param min_x    The lower bound of the interval.
+    @param max_x    The upper bound of the interval.
+    @param N        The number of samples to be generated.
+
+    @return         The generated sample.
+    """
+
+    max_value = optimize.brute(
+        lambda X: -pdf(X), ranges=(slice(min_x, max_x, (max_x - min_x) / 1000),)
+    )
+
+    samples = []
+    while len(samples) < N:
+        x_samples = np.random.uniform(low=min_x, high=max_x, size=N // 10)
+        y_samples = np.random.uniform(low=0, high=max_value, size=N // 10)
+
+        correct_samples = y_samples <= pdf(x_samples)
+
+        x_samples = x_samples[correct_samples]
+
+        if len(samples) + len(x_samples) > N:
+            samples.extend(x_samples[: N - len(x_samples)])
+        else:
+            samples.extend(x_samples)
+
+    return np.array(samples)

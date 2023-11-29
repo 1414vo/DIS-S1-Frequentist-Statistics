@@ -11,10 +11,16 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import scipy.stats as stats
-from src.distribution_utils.distribution import partial_pdf, normalization_constant
+from src.distribution_utils.distribution import (
+    partial_pdf,
+    normalization_constant,
+    generate_sample,
+)
 
 
-def plot_distribution_mix(f, lam, mu, sigma, alpha, beta):
+def plot_distribution_mix(
+    f: float, lam: float, mu: float, sigma: float, alpha: float, beta: float
+):
     r"""! Plots the overlay of the pdf and the 2 components of the distribution:
     \f$p(M; f,\lambda,\mu,\sigma) = fs(M;\mu, \sigma) + (1-f)b(M; \lambda)\f$.
 
@@ -46,5 +52,29 @@ def plot_distribution_mix(f, lam, mu, sigma, alpha, beta):
         label="Exponential component",
     )
     plt.plot(X, total_pdf(X), label="Total probability distribution", alpha=0.5)
+    plt.legend()
+    plt.show()
+
+
+def plot_samples(
+    f: float,
+    lam: float,
+    mu: float,
+    sigma: float,
+    alpha: float,
+    beta: float,
+    N: int = 100000,
+):
+    sns.set()
+    X = np.linspace(alpha, beta, 1000)
+
+    total_pdf = partial_pdf(f, lam, mu, sigma, alpha, beta)
+
+    plt.plot(X, total_pdf(X), label="Total probability distribution", alpha=0.5)
+
+    samples = generate_sample(total_pdf, alpha, beta, N)
+
+    plt.hist(samples, bins=50, label="Sample distribution", density=True)
+
     plt.legend()
     plt.show()
