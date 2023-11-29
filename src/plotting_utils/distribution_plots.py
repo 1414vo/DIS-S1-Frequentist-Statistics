@@ -65,6 +65,19 @@ def plot_samples(
     beta: float,
     N: int = 100000,
 ):
+    r"""! Plots the density of a sample versus the true distribution.
+
+    @param f        The fraction of the distribution attributed to the normal component.
+                    Must be a real number between 0 and 1.
+    @param lam      The \f$\lambda\f$ parameter of the exponential distribution.
+                    Must be a positive number.
+    @param mu       The mean of the normal distribution.
+    @param sigma    The standard deviation of the normal distribution. Must be positive.
+    @param alpha    The lower bound of the distribution. Must be non-negative.
+    @param beta     The upper bound of the distribution. Must be larger than alpha.
+    @param N        The number of samples to be generated.
+    """
+
     sns.set()
     X = np.linspace(alpha, beta, 1000)
 
