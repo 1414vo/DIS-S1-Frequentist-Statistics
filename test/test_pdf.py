@@ -1,11 +1,6 @@
 from scipy import integrate
 import math
-from src.distribution_utils.distribution import distribution_pdf
-
-
-def partial_pdf(*args, **kwargs):
-    r"""Generates a wrapper pdf from relevant parameters."""
-    return lambda X: distribution_pdf(X, *args, **kwargs)
+from src.distribution_utils.distribution import partial_pdf
 
 
 def pdf_test_template(func, lim=(0, 1)):
