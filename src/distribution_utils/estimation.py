@@ -24,7 +24,7 @@ def unbinned_mle_estimation(
 
     @return     The estimated parameters, Hessian matrix and errors."""
     cost = UnbinnedNLL(data=X, pdf=f)
-    model = Minuit(cost, **kwargs)
+    model = Minuit(cost, **(kwargs["params"]))
 
     if "fixed" in kwargs:
         for param in kwargs["fixed"]:
