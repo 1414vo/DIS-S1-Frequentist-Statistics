@@ -57,21 +57,30 @@ def check_parameters(
 
 @cache
 def normalization_constant(
-    f: float, lam: float, mu: float, sigma: float, alpha: float, beta: float
+    f: float,
+    lam: float,
+    mu: float,
+    sigma: float,
+    alpha: float,
+    beta: float,
+    disable_checks: bool = False,
 ) -> float:
     r"""! Computes the normalization for the distribution
     \f$p(M; f,\lambda,\mu,\sigma) = fs(M;\mu, \sigma) + (1-f)b(M; \lambda)\f$.
 
-    @param f        The fraction of the distribution attributed to the normal component.
-                    Must be a real number between 0 and 1.
-    @param lam      The \f$\lambda\f$ parameter of the exponential distribution.
-                    Must be a positive number.
-    @param mu       The mean of the normal distribution.
-    @param sigma    The standard deviation of the normal distribution. Must be positive.
-    @param alpha    The lower bound of the distribution. Must be non-negative.
-    @param beta     The upper bound of the distribution. Must be larger than alpha.
+    @param f                The fraction of the distribution attributed to the normal component.
+                            Must be a real number between 0 and 1.
+    @param lam              The \f$\lambda\f$ parameter of the exponential distribution.
+                            Must be a positive number.
+    @param mu               The mean of the normal distribution.
+    @param sigma            The standard deviation of the normal distribution. Must be positive.
+    @param alpha            The lower bound of the distribution. Must be non-negative.
+    @param beta             The upper bound of the distribution. Must be larger than alpha.
+    @param disable_checks   Whether to check for parameter validity. Should be disabled when
+                            performing MLE.
     """
-    check_parameters(f, lam, mu, sigma, alpha, beta)
+    if not disable_checks:
+        check_parameters(f, lam, mu, sigma, alpha, beta)
 
     root_2 = 2**0.5
 

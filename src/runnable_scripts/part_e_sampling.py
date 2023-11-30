@@ -60,12 +60,18 @@ if __name__ == "__main__":
         )
         n_samples = 100000
 
-    fixed_parameters = ["alpha", "beta"]
-    limits = {"f": (0, 1), "lam": (0, None), "sigma": (0, None)}
-
     # Create sample
     pdf = partial_pdf(**params)
     sample = generate_sample(pdf, min_x=params["alpha"], max_x=params["beta"])
+
+    fixed_parameters = ["alpha", "beta"]
+    limits = {
+        "f": (0, 1),
+        "lam": (0, None),
+        "sigma": (0, None),
+        "alpha": (None, min(sample)),
+        "beta": (max(sample), None),
+    }
 
     # Estimate distribution parameters.
     values, _, errors = unbinned_mle_estimation(
