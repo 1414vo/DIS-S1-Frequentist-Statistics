@@ -78,6 +78,8 @@ def normalization_constant(
     @param beta             The upper bound of the distribution. Must be larger than alpha.
     @param disable_checks   Whether to check for parameter validity. Should be disabled when
                             performing MLE.
+
+    @return                 The normalization constants for both the normal and exponential components.
     """
     if not disable_checks:
         check_parameters(f, lam, mu, sigma, alpha, beta)
@@ -133,6 +135,45 @@ def partial_pdf(*args, **kwargs):
 
     @return A partially instantiated pdf from a set of parameters."""
     return lambda X: distribution_pdf(X, *args, **kwargs)
+
+
+@cache
+def background_only_normalization(lam: float, alpha: float, beta: float):
+    r"""! Computes the normalization for the distribution
+    \f$p(M; \lambda) = N \lambda e^{-\lambda M}\f$ in the range \f$[\alpha, \beta]\f$.
+
+    @param f                The fraction of the distribution attributed to the normal component.
+                            Must be a real number between 0 and 1.
+    @param lam              The \f$\lambda\f$ parameter of the exponential distribution.
+                            Must be a positive number.
+    @param alpha            The lower bound of the distribution. Must be non-negative.
+    @param beta             The upper bound of the distribution. Must be larger than alpha.\
+
+    @return                 The normalization constant for the exponential distribution.
+    """
+    if alpha >= 0:
+        return math.exp(-lam * alpha) - math.exp(-lam * beta)
+    else:
+        return 1 - math.exp(-lam * beta)
+
+
+def background_only_distribution(M, lam: float, alpha: float, beta: float):
+    r"""! Computes the probability density function for the distribution
+    \f$p(M; \lambda) = N \lambda e^{-\lambda M}\f$ in the range \f$[\alpha, \beta]\f$.
+
+    @param M                A value or iterable of observations.
+    @param f                The fraction of the distribution attributed to the normal component.
+                            Must be a real number between 0 and 1.
+    @param lam              The \f$\lambda\f$ parameter of the exponential distribution.
+                            Must be a positive number.
+    @param alpha            The lower bound of the distribution. Must be non-negative.
+    @param beta             The upper bound of the distribution. Must be larger than alpha.\
+
+    @return                 The probability density functions of the observations.
+    """
+    return stats.expon.pdf(M, scale=1 / lam) / background_only_normalization(
+        lam, alpha, beta
+    )
 
 
 def generate_sample(
