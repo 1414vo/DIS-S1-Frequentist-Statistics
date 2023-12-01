@@ -130,11 +130,11 @@ def distribution_pdf(
     )
 
 
-def partial_pdf(*args, **kwargs):
+def partial_pdf(pdf=distribution_pdf, *args, **kwargs):
     r"""Generates a wrapper pdf from relevant parameters.
 
     @return A partially instantiated pdf from a set of parameters."""
-    return lambda X: distribution_pdf(X, *args, **kwargs)
+    return lambda X: pdf(X, *args, **kwargs)
 
 
 @cache
