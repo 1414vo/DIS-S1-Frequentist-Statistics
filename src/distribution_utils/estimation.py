@@ -14,7 +14,7 @@ import numpy as np
 
 
 def unbinned_mle_estimation(
-    X: np.ndarray, f: Callable[[Iterable], float], **kwargs
+    X: np.ndarray, f: Callable[[Iterable], float], print_results=False, **kwargs
 ) -> Tuple:
     """! Unbinned Maximum Likelihood esimation for a sample. Reports the estimated values,
     as well as the errors
@@ -36,7 +36,8 @@ def unbinned_mle_estimation(
 
     model.migrad()
 
-    print("Fit status: ")
-    print(model)
+    if print_results:
+        print("Fit status: ")
+        print(model)
 
     return model.values, model.hesse, model.errors

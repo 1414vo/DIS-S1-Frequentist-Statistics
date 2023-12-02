@@ -39,7 +39,7 @@ def check_parameters(
     if f < 0 or f > 1:
         raise ValueError('Fraction parameter "f" must be between 0 and 1.')
 
-    if lam <= 0 or sigma <= 0:
+    if lam < 0 or sigma <= 0:
         raise ValueError(
             'Invalid parameter values - decay parameter "lam" and\
             normal distribution standard deviation "sigma" must be positive.'
@@ -123,6 +123,11 @@ def distribution_pdf(
 
     normal_component = f * stats.norm.pdf(M, loc=mu, scale=sigma)
     exponential_component = (1 - f) * stats.expon.pdf(M, scale=1 / lam)
+
+    if normal_constant == 0:
+        return exponential_component / exponential_constant
+    elif exponential_constant == 0:
+        return normal_component / normal_constant
 
     return (
         normal_component / normal_constant
