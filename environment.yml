@@ -1,7 +1,6 @@
 name: base
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - python==3.9.18
   - conda==23.10.0
@@ -18,4 +17,7 @@ dependencies:
   - scipy
   - seaborn
   - matplotlib
+  - iminuit
+  - ipykernel
+  - numba-stats
 prefix: /opt/conda
