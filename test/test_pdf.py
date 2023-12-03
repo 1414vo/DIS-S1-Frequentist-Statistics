@@ -1,6 +1,6 @@
 from scipy import integrate
 import math
-from src.distribution_utils.distribution import partial_pdf
+from src.distribution_utils.distributions import partial_pdf
 
 
 def pdf_test_template(func, lim=(0, 1)):

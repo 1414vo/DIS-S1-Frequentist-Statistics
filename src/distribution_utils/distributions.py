@@ -1,4 +1,4 @@
-r"""! @file distribution.py
+r"""! @file distributions.py
 @brief Contains methods to compute properties of the used distribution.
 
 @details Contains methods to compute and verify properties of the distribution
@@ -143,7 +143,7 @@ def partial_pdf(pdf=distribution_pdf, *args, **kwargs):
 
 
 @cache
-def background_only_normalization(lam: float, alpha: float, beta: float):
+def background_normalization(lam: float, alpha: float, beta: float):
     r"""! Computes the normalization for the distribution
     \f$p(M; \lambda) = N \lambda e^{-\lambda M}\f$ in the range \f$[\alpha, \beta]\f$.
 
@@ -162,7 +162,7 @@ def background_only_normalization(lam: float, alpha: float, beta: float):
         return 1 - math.exp(-lam * beta)
 
 
-def background_only_distribution(M, lam: float, alpha: float, beta: float):
+def background_pdf(M, lam: float, alpha: float, beta: float):
     r"""! Computes the probability density function for the distribution
     \f$p(M; \lambda) = N \lambda e^{-\lambda M}\f$ in the range \f$[\alpha, \beta]\f$.
 
@@ -176,7 +176,7 @@ def background_only_distribution(M, lam: float, alpha: float, beta: float):
 
     @return                 The probability density functions of the observations.
     """
-    return stats.expon.pdf(M, scale=1 / lam) / background_only_normalization(
+    return stats.expon.pdf(M, scale=1 / lam) / background_normalization(
         lam, alpha, beta
     )
 
