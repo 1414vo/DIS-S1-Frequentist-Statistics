@@ -11,7 +11,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import scipy.stats as stats
-from src.distribution_utils.distribution import (
+from src.distribution_utils.distributions import (
     partial_pdf,
     normalization_constant,
     generate_sample,
@@ -55,7 +55,7 @@ def plot_distribution_mix(
     sns.set()
     X = np.linspace(alpha, beta, 1000)
 
-    total_pdf = partial_pdf(f, lam, mu, sigma, alpha, beta)
+    total_pdf = partial_pdf(f=f, lam=lam, mu=mu, sigma=sigma, alpha=alpha, beta=beta)
     norm_constants = normalization_constant(f, lam, mu, sigma, alpha, beta)
 
     plt.plot(
@@ -98,7 +98,7 @@ def plot_samples(
     sns.set()
     X = np.linspace(alpha, beta, 1000)
 
-    total_pdf = partial_pdf(f, lam, mu, sigma, alpha, beta)
+    total_pdf = partial_pdf(f=f, lam=lam, mu=mu, sigma=sigma, alpha=alpha, beta=beta)
 
     plt.plot(X, total_pdf(X), label="Total probability distribution", alpha=0.5)
 
@@ -135,7 +135,7 @@ def plot_mle(
     sns.set()
     X = np.linspace(alpha, beta, 1000)
 
-    total_pdf = partial_pdf(f, lam, mu, sigma, alpha, beta)
+    total_pdf = partial_pdf(f=f, lam=lam, mu=mu, sigma=sigma, alpha=alpha, beta=beta)
 
     plt.plot(X, total_pdf(X), label="Estimated probability distribution")
 

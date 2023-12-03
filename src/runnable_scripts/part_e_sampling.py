@@ -13,7 +13,7 @@ both in text format, alongside their MLE errors, as well as as a graphical repre
 
 import sys
 import configparser as cfg
-from src.distribution_utils.distribution import (
+from src.distribution_utils.distributions import (
     distribution_pdf,
     partial_pdf,
     generate_sample,

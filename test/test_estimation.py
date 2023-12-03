@@ -1,4 +1,4 @@
-from src.distribution_utils.distribution import (
+from src.distribution_utils.distributions import (
     partial_pdf,
     distribution_pdf,
     generate_sample,
