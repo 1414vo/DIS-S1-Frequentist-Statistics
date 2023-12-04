@@ -3,7 +3,7 @@ from src.distribution_utils.estimation import (
     unbinned_mle_estimation,
     binned_mle_estimation,
 )
-from scipy.stats import chi2
+from scipy.stats import chi2, poisson
 from functools import partial
 import numpy as np
 
@@ -149,7 +149,7 @@ def get_t2_error(h0_distribution, h1_distribution, t1_error_rate):
     return np.count_nonzero(h1_distribution < t_threshold) / len(h1_distribution)
 
 
-def find_size_threshold(
+def binary_threshold_search(
     h0, h1, t1_error_rate=2.9e-7, t2_error_rate=0.1, n_samples=10000, n_0=500, **kwargs
 ):
     val_range = (0, n_0)
@@ -191,3 +191,63 @@ def find_size_threshold(
             low_score = new_score
         print(val_range, low_score, high_score)
     return val_range[1]
+
+
+def weighted_threshold_search(
+    h0, h1, t1_error_rate=2.9e-7, t2_error_rate=0.1, n_samples=10000, n_0=500, **kwargs
+):
+    val_range = [10, n_0]
+    low_score = 0
+    get_statistic = partial(
+        binned_test_statistic_distribution,
+        h0=h0,
+        h1=h1,
+        stat=log_likelihood_ratio,
+        null_fit=kwargs["null_fit"],
+        null_limits=kwargs["null_limits"],
+        alt_fit=kwargs["alt_fit"],
+        alt_limits=kwargs["alt_limits"],
+        alt_init=kwargs["alt_init"],
+        n_samples=n_samples,
+    )
+    high_score = get_t2_error(*get_statistic(sample_size=n_0), t1_error_rate)
+    print(val_range, low_score, high_score)
+    # Find upper limit of range
+    while high_score > t2_error_rate:
+        low_score, high_score = high_score, get_t2_error(
+            *get_statistic(sample_size=2 * val_range[1]), t1_error_rate
+        )
+        val_range = [val_range[1], val_range[1] * 2]
+        print(val_range, low_score, high_score)
+
+    low_p = poisson.cdf(low_score * n_samples, mu=t2_error_rate * n_samples)
+    high_p = poisson.cdf(high_score * n_samples, mu=t2_error_rate * n_samples)
+    print(val_range, low_score, high_score, low_p, high_p)
+    # Binary search
+    while not (
+        low_score * n_samples - (t2_error_rate * n_samples) ** 0.5
+        <= t2_error_rate * n_samples
+        <= high_score * n_samples + (t2_error_rate * n_samples) ** 0.5
+    ):
+        sample_value = (val_range[0] + val_range[1]) // 2
+        mid_score = get_t2_error(
+            *get_statistic(sample_size=sample_value), t1_error_rate
+        )
+        mid_p = poisson.cdf(mid_score * n_samples, mu=t2_error_rate * n_samples)
+        val_range[0] = sample_value - (val_range[1] - val_range[0]) / 2 * (
+            low_p - mid_p
+        ) / (low_p - high_p)
+        val_range[1] = sample_value + (val_range[1] - val_range[0]) / 2 * (
+            mid_p - high_p
+        ) / (low_p - high_p)
+        print(val_range)
+        low_score = get_t2_error(
+            *get_statistic(sample_size=val_range[0]), t1_error_rate
+        )
+        high_score = get_t2_error(
+            *get_statistic(sample_size=val_range[1]), t1_error_rate
+        )
+        low_p = poisson.cdf(low_score * n_samples, mu=t2_error_rate * n_samples)
+        high_p = poisson.cdf(high_score * n_samples, mu=t2_error_rate * n_samples)
+        print(val_range, low_score, mid_score, high_score, low_p, mid_p, high_p)
+    return val_range
