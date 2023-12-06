@@ -292,6 +292,6 @@ def weighted_threshold_search(
         lower_bound = item[1] - error
         upper_bound = item[1] + error
         if lower_bound < t2_error_rate < upper_bound:
-            valid_guesses.append(error)
+            valid_guesses.append(item[0])
 
     return results, (min(valid_guesses), max(valid_guesses))
