@@ -141,8 +141,9 @@ def get_t2_error(h0_distribution, h1_distribution, t1_error_rate):
     def chi2_pdf(X, df):
         return chi2.pdf(X, df=df)
 
+    sample = h0_distribution[np.isfinite(h0_distribution)]
     chi2_fit, _, _ = unbinned_mle_estimation(
-        h0_distribution, chi2_pdf, params={"df": 3}, limits={"df": (0, None)}
+        sample, chi2_pdf, params={"df": 3}, limits={"df": (0, None)}
     )
     t_threshold = chi2.ppf(1 - t1_error_rate, df=chi2_fit["df"])
     print(chi2_fit)
@@ -152,8 +153,8 @@ def get_t2_error(h0_distribution, h1_distribution, t1_error_rate):
 def binary_threshold_search(
     h0, h1, t1_error_rate=2.9e-7, t2_error_rate=0.1, n_samples=10000, n_0=500, **kwargs
 ):
-    val_range = (0, n_0)
-    low_score = 1
+    results = []
+    val_range = (1, n_0)
     get_statistic = partial(
         binned_test_statistic_distribution,
         h0=h0,
@@ -167,36 +168,35 @@ def binary_threshold_search(
         n_samples=n_samples,
     )
     high_score = get_t2_error(*get_statistic(sample_size=n_0), t1_error_rate)
-    print(val_range, low_score, high_score)
+    results.append((val_range[1], high_score))
     # Find upper limit of range
     while high_score > t2_error_rate:
-        low_score, high_score = high_score, get_t2_error(
+        high_score = high_score, get_t2_error(
             *get_statistic(sample_size=2 * val_range[1]), t1_error_rate
         )
         val_range = (val_range[1], val_range[1] * 2)
-        print(val_range, low_score, high_score)
-
+        results.append((val_range[1], high_score))
     # Binary search
     while val_range[1] - val_range[0] != 1:
-        print(val_range, high_score)
         sample_value = (val_range[0] + val_range[1]) // 2
         new_score = get_t2_error(
             *get_statistic(sample_size=sample_value), t1_error_rate
         )
+        results.append((sample_value, new_score))
         if new_score < t2_error_rate:
             val_range = (val_range[0], sample_value)
             high_score = new_score
         else:
             val_range = (sample_value, val_range[1])
-            low_score = new_score
-        print(val_range, low_score, high_score)
-    return val_range[1]
+
+    return results, val_range[1]
 
 
 def weighted_threshold_search(
     h0, h1, t1_error_rate=2.9e-7, t2_error_rate=0.1, n_samples=10000, n_0=500, **kwargs
 ):
-    val_range = [10, n_0]
+    results = []
+    val_range = [1, n_0]
     low_score = 0
     get_statistic = partial(
         binned_test_statistic_distribution,
@@ -211,18 +211,30 @@ def weighted_threshold_search(
         n_samples=n_samples,
     )
     high_score = get_t2_error(*get_statistic(sample_size=n_0), t1_error_rate)
-    print(val_range, low_score, high_score)
-    # Find upper limit of range
+    results.append(
+        (
+            val_range[1],
+            high_score,
+            poisson.cdf(high_score * n_samples, mu=t2_error_rate * n_samples),
+        )
+    )
     while high_score > t2_error_rate:
         low_score, high_score = high_score, get_t2_error(
             *get_statistic(sample_size=2 * val_range[1]), t1_error_rate
         )
         val_range = [val_range[1], val_range[1] * 2]
-        print(val_range, low_score, high_score)
+        print(val_range, high_score)
+        results.append(
+            (
+                val_range[1],
+                high_score,
+                poisson.cdf(high_score * n_samples, mu=t2_error_rate * n_samples),
+            )
+        )
 
     low_p = poisson.cdf(low_score * n_samples, mu=t2_error_rate * n_samples)
     high_p = poisson.cdf(high_score * n_samples, mu=t2_error_rate * n_samples)
-    print(val_range, low_score, high_score, low_p, high_p)
+
     # Binary search
     while not (
         low_score * n_samples - (t2_error_rate * n_samples) ** 0.5
@@ -234,13 +246,13 @@ def weighted_threshold_search(
             *get_statistic(sample_size=sample_value), t1_error_rate
         )
         mid_p = poisson.cdf(mid_score * n_samples, mu=t2_error_rate * n_samples)
-        val_range[0] = sample_value - (val_range[1] - val_range[0]) / 2 * (
-            low_p - mid_p
-        ) / (low_p - high_p)
-        val_range[1] = sample_value + (val_range[1] - val_range[0]) / 2 * (
-            mid_p - high_p
-        ) / (low_p - high_p)
-        print(val_range)
+        val_range[0] = sample_value - int(
+            (val_range[1] - val_range[0]) / 2 * (low_p - mid_p) / (low_p - high_p)
+        )
+        val_range[1] = sample_value + int(
+            (val_range[1] - val_range[0]) / 2 * (mid_p - high_p) / (low_p - high_p)
+        )
+
         low_score = get_t2_error(
             *get_statistic(sample_size=val_range[0]), t1_error_rate
         )
@@ -249,5 +261,37 @@ def weighted_threshold_search(
         )
         low_p = poisson.cdf(low_score * n_samples, mu=t2_error_rate * n_samples)
         high_p = poisson.cdf(high_score * n_samples, mu=t2_error_rate * n_samples)
-        print(val_range, low_score, mid_score, high_score, low_p, mid_p, high_p)
-    return val_range
+        print(val_range[0], low_score, low_p)
+        print(sample_value, mid_score, mid_p)
+        print(val_range[1], high_score, high_p)
+        results.append(
+            (
+                val_range[0],
+                low_score,
+                poisson.cdf(low_score * n_samples, mu=t2_error_rate * n_samples),
+            )
+        )
+        results.append(
+            (
+                sample_value,
+                mid_score,
+                poisson.cdf(mid_score * n_samples, mu=t2_error_rate * n_samples),
+            )
+        )
+        results.append(
+            (
+                val_range[1],
+                high_score,
+                poisson.cdf(high_score * n_samples, mu=t2_error_rate * n_samples),
+            )
+        )
+
+    valid_guesses = []
+    for item in results:
+        error = np.sqrt(item[1] / item[0])
+        lower_bound = item[1] - error
+        upper_bound = item[1] + error
+        if lower_bound < t2_error_rate < upper_bound:
+            valid_guesses.append(error)
+
+    return results, (min(valid_guesses), max(valid_guesses))
