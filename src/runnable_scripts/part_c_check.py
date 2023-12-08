@@ -16,15 +16,14 @@ import configparser as cfg
 import json
 import numpy as np
 from scipy import integrate
-from src.distribution_utils.distribution import distribution_pdf
+from src.distribution_utils.distributions import distribution_pdf
 
 if __name__ == "__main__":
     # Check configuration location
     if len(sys.argv) == 2:
         input_file = sys.argv[1]
     elif len(sys.argv) == 1:
-        input_file = "./configs/distr_parameters.ini"
-        print(input_file)
+        input_file = "./configs/part_c_config.ini"
     else:
         print("This program accepts only a single command line argument")
         exit()
