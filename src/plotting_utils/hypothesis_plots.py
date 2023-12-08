@@ -1,11 +1,27 @@
+r"""! @file hypothesis_plots.py
+@brief Contains methods for visualising the process of hypothesis testing and determining
+the dataset size threshold.
+
+@details Contains methods for visualising the process of hypothesis testing and determining
+the dataset size threshold. The former is acheived by showing that as the dataset size increases,
+the T2 error threshold moves to a greater value of the test statistic. The latter is done by plotting the
+sampled values with their associated errors.
+
+@author Created by I. Petrov on 06/12/2023
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
+
+from typing import Tuple, List, Dict
 from scipy.stats import chi2
 from src.distribution_utils.estimation import unbinned_mle_estimation
 from sklearn.cluster import KMeans
 
 
-def plot_threshold_search(results, threshold, n_iter=1000):
+def plot_threshold_search(
+    results: Tuple[List, List, List], threshold: float, n_iter: int = 1000
+) -> None:
     """! Visualizes the search algorithm for finding the dataset size corresponding to a T2 error threshold.
 
     @param results      A tuple of 1) A list of dataset sizes, 2) The corresponding T2 error rate,
@@ -63,7 +79,7 @@ def plot_threshold_search(results, threshold, n_iter=1000):
     plt.show()
 
 
-def __select_samples(size_samples, n_samples=4):
+def __select_samples(size_samples: np.ndarray, n_samples: int = 4) -> List[int]:
     r"""! From a set of dataset sizes, selects a number such that the pairwise distance between them is maximized.
     This is achieved through a K-means clustering algorithm, in which we take the closest point to each centroid.
 
@@ -92,8 +108,17 @@ def __select_samples(size_samples, n_samples=4):
 
 
 def plot_t_statistic_distribution(
-    h0_distribution, h1_distributions, t1_error_rate, t2_error_rate
-):
+    h0_distribution: np.ndarray,
+    h1_distributions: Dict[int, List[float]],
+    t1_error_rate: float,
+    t2_error_rate: float,
+) -> None:
+    """! Visualizes the obtained test statistic distributions after a search has been executed.
+
+    @param h0_distribution  Data points obtained from generating the test statistic under the null hypothesis.
+    @param h1_distributions Data points obtained from generating the test statistic under the alternate hypothesis.
+    @param t1_error_rate    The Type 1 error threshold.
+    @param t2_error_rate    The Type 2 error threshold."""
     plt.figure(figsize=(10, 6), dpi=150)
 
     # Fit a Chi-squared distribution for the H0 distribution
