@@ -148,17 +148,22 @@ def generate_distribution_samples(
 
     @return             A sample of size given by the size variable.
     """
-    classes = uniform.rvs(a=0, w=1, size=size, random_state=random_state)
+    states = (
+        range(random_state, random_state + 3)
+        if random_state is not None
+        else [None, None, None]
+    )
+    classes = uniform.rvs(a=0, w=1, size=size, random_state=states[0])
     exp = truncexpon.rvs(
         xmin=alpha,
         xmax=beta,
         loc=alpha,
         scale=1 / lam,
         size=size,
-        random_state=random_state,
+        random_state=states[1],
     )
     norm = truncnorm.rvs(
-        loc=mu, scale=sigma, xmin=alpha, xmax=beta, size=size, random_state=random_state
+        loc=mu, scale=sigma, xmin=alpha, xmax=beta, size=size, random_state=states[2]
     )
     return np.where(classes < f, norm, exp)
 
@@ -251,14 +256,19 @@ def generate_two_signal_distribution_samples(
 
     @return         A sample of size given by the size variable.
     """
-    classes = uniform.rvs(a=0, w=1, size=size, random_state=random_state)
+    states = (
+        range(random_state, random_state + 4)
+        if random_state is not None
+        else [None, None, None, None]
+    )
+    classes = uniform.rvs(a=0, w=1, size=size, random_state=states[0])
     exp = truncexpon.rvs(
         xmin=alpha,
         xmax=beta,
         loc=alpha,
         scale=1 / lam,
         size=size,
-        random_state=random_state,
+        random_state=states[1],
     )
     norm1 = truncnorm.rvs(
         loc=mu1,
@@ -266,7 +276,7 @@ def generate_two_signal_distribution_samples(
         xmin=alpha,
         xmax=beta,
         size=size,
-        random_state=random_state,
+        random_state=states[2],
     )
     norm2 = truncnorm.rvs(
         loc=mu2,
@@ -274,6 +284,6 @@ def generate_two_signal_distribution_samples(
         xmin=alpha,
         xmax=beta,
         size=size,
-        random_state=random_state,
+        random_state=states[3],
     )
     return np.where(classes < f1, norm1, np.where(classes < f1 + f2, norm2, exp))

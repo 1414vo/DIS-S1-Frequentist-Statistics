@@ -44,7 +44,7 @@ def plot_threshold_search(results, threshold):
 
 
 def plot_t_statistic_distribution(
-    h0_distribution, h1_distribution, t1_error_rate, t2_error_rate
+    h0_distribution, h1_distributions, t1_error_rate, t2_error_rate
 ):
     def chi2_pdf(X, df):
         return chi2.pdf(X, df=df)
@@ -59,22 +59,24 @@ def plot_t_statistic_distribution(
         label="T statistic under H0",
         density=True,
     )
-    plt.hist(
-        h1_distribution,
-        bins=int(len(h1_distribution) ** 0.5),
-        label="T statistic under H1",
-        density=True,
-    )
+    for n_samples in h1_distributions:
+        plt.hist(
+            h1_distributions[n_samples],
+            bins=int(len(h1_distributions[n_samples]) ** 0.5),
+            label=f"T statistic under H1 for {n_samples} data points",
+            density=True,
+        )
+        plt.axvline(
+            np.quantile(h1_distributions[n_samples], t2_error_rate),
+            label=f"$1 - \beta = {t2_error_rate}$ for {n_samples} data points",
+        )
     X = np.linspace(0, 2 * max(h0_distribution), 1000)
     plt.plot(X, chi2_pdf(X, chi2_fit["df"]), label="Chi-squared distribution fit")
     plt.axvline(
         chi2.ppf(1 - t1_error_rate, df=chi2_fit["df"]),
         label=f"$\alpha = {t1_error_rate}$",
     )
-    plt.axvline(
-        np.quantile(h1_distribution, t2_error_rate),
-        label=f"$1 - \beta = {t2_error_rate}$",
-    )
+
     plt.xlabel("Log-Likelihood Ratio")
     plt.ylabel("Test statistic probability density")
     plt.show()

@@ -55,7 +55,7 @@ def hypothesis_test(
             sample, h0["pdf"], params=null_params, limits=null_limits
         )
 
-        alternate_fit_params, _, _ = binned_mle_estimation(
+        alternate_fit_params, _, _ = unbinned_mle_estimation(
             sample, h1["pdf"], params=alternate_params, limits=alternate_limits
         )
     h0_fit = partial_pdf(pdf=h0["pdf"], **null_fit_params.to_dict())
@@ -70,10 +70,14 @@ def test_statistic_distribution(
     null_stat = []
     alt_stat = []
     for _ in range(n_samples):
+        state = np.random.randint(1, 1000000)
         null_sample = h0["rvs"](
-            **kwargs["null_fit"], size=sample_size, random_state=None
+            **kwargs["null_fit"], size=sample_size, random_state=state
         )
-        alt_sample = h1["rvs"](**kwargs["alt_fit"], size=sample_size, random_state=None)
+        state = np.random.randint(1, 1000000)
+        alt_sample = h1["rvs"](
+            **kwargs["alt_fit"], size=sample_size, random_state=state
+        )
 
         args = {
             "null_params": kwargs["null_fit"],
@@ -89,7 +93,6 @@ def test_statistic_distribution(
         alt_stat.append(
             hypothesis_test(alt_sample, h0, h1, stat, binned=binned, **args)
         )
-
     if store:
         store[sample_size] = (np.array(null_stat), np.array(alt_stat))
 
@@ -102,11 +105,11 @@ def get_t2_error(h0_distribution, h1_distribution, t1_error_rate, df_init=2.5):
 
     is_not_outlier = h0_distribution < np.quantile(h0_distribution, 0.99)
     is_fit_invalid = h0_distribution < 1e-8
-    sample = h0_distribution[
+    h0_sample = h0_distribution[
         np.isfinite(h0_distribution) & is_not_outlier & ~is_fit_invalid
     ]
     chi2_fit, _, _ = unbinned_mle_estimation(
-        sample, chi2_pdf, params={"df": df_init}, limits={"df": (0, None)}
+        h0_sample, chi2_pdf, params={"df": df_init}, limits={"df": (0, None)}
     )
     t_threshold = chi2.ppf(1 - t1_error_rate, df=chi2_fit["df"])
 
@@ -114,7 +117,14 @@ def get_t2_error(h0_distribution, h1_distribution, t1_error_rate, df_init=2.5):
 
 
 def binary_threshold_search(
-    h0, h1, t1_error_rate=2.9e-7, t2_error_rate=0.1, n_samples=10000, n_0=500, **kwargs
+    h0,
+    h1,
+    t1_error_rate=2.9e-7,
+    t2_error_rate=0.1,
+    n_samples=10000,
+    n_0=500,
+    binned=True,
+    **kwargs
 ):
     results = []
     val_range = (1, n_0)
@@ -129,6 +139,7 @@ def binary_threshold_search(
         alt_limits=kwargs["alt_limits"],
         alt_init=kwargs["alt_init"],
         n_samples=n_samples,
+        binned=binned,
     )
     high_score = get_t2_error(*get_statistic(sample_size=n_0), t1_error_rate)
     results.append((val_range[1], high_score))
@@ -171,6 +182,8 @@ def weighted_threshold_search(
     low_score = 0
     if store_distributions:
         store = {}
+    else:
+        store = None
     get_statistic = partial(
         test_statistic_distribution,
         h0=h0,
@@ -182,13 +195,9 @@ def weighted_threshold_search(
         alt_limits=kwargs["alt_limits"],
         alt_init=kwargs["alt_init"],
         n_samples=n_samples,
+        store=store,
     )
-    t2_error = partial(
-        get_t2_error,
-        t1_error_rate=t1_error_rate,
-        df_init=df_diff,
-        store=store if store_distributions else None,
-    )
+    t2_error = partial(get_t2_error, t1_error_rate=t1_error_rate, df_init=df_diff)
     high_score = t2_error(*get_statistic(sample_size=n_0))
     results.append(
         (
@@ -198,9 +207,10 @@ def weighted_threshold_search(
         )
     )
     while high_score > t2_error_rate:
-        low_score, high_score = high_score, t2_error(*get_statistic(sample_size=n_0))
+        low_score, high_score = high_score, t2_error(
+            *get_statistic(sample_size=2 * val_range[1])
+        )
         val_range = [val_range[1], val_range[1] * 2]
-        print(val_range, high_score)
         results.append(
             (
                 val_range[1],
@@ -208,18 +218,16 @@ def weighted_threshold_search(
                 poisson.cdf(high_score * n_samples, mu=t2_error_rate * n_samples),
             )
         )
-
+    lower_hit = False
+    upper_hit = False
     low_p = poisson.cdf(low_score * n_samples, mu=t2_error_rate * n_samples)
     high_p = poisson.cdf(high_score * n_samples, mu=t2_error_rate * n_samples)
-
+    print("Start Low", val_range[0], low_score, low_p)
+    print("Start High", val_range[1], high_score, high_p)
     # Binary search
-    while not (
-        low_score * n_samples - (t2_error_rate * n_samples) ** 0.5
-        <= t2_error_rate * n_samples
-        <= high_score * n_samples + (t2_error_rate * n_samples) ** 0.5
-    ):
+    while not (lower_hit and upper_hit):
         sample_value = (val_range[0] + val_range[1]) // 2
-        mid_score = t2_error(*get_statistic(sample_size=n_0))
+        mid_score = t2_error(*get_statistic(sample_size=sample_value))
         mid_p = poisson.cdf(mid_score * n_samples, mu=t2_error_rate * n_samples)
         val_range[0], val_range[1] = sample_value - int(
             (val_range[1] - val_range[0]) / 2 * (low_p - mid_p) / (low_p - high_p)
@@ -227,13 +235,25 @@ def weighted_threshold_search(
             (val_range[1] - val_range[0]) / 2 * (mid_p - high_p) / (low_p - high_p)
         )
 
-        low_score = t2_error(*get_statistic(sample_size=n_0))
-        high_score = t2_error(*get_statistic(sample_size=n_0))
+        low_score = t2_error(*get_statistic(sample_size=val_range[0]))
+        high_score = t2_error(*get_statistic(sample_size=val_range[1]))
         low_p = poisson.cdf(low_score * n_samples, mu=t2_error_rate * n_samples)
         high_p = poisson.cdf(high_score * n_samples, mu=t2_error_rate * n_samples)
-        print(val_range[0], low_score, low_p)
-        print(sample_value, mid_score, mid_p)
-        print(val_range[1], high_score, high_p)
+        print("Low", val_range[0], low_score, low_p)
+        print("Mid", sample_value, mid_score, mid_p)
+        print("High", val_range[1], high_score, high_p)
+        if (
+            low_score * n_samples - (t2_error_rate * n_samples) ** 0.5
+            <= t2_error_rate * n_samples
+        ):
+            lower_hit = True
+            print("Lower Hit:", val_range[0])
+        if (
+            t2_error_rate * n_samples
+            <= high_score * n_samples + (t2_error_rate * n_samples) ** 0.5
+        ):
+            upper_hit = True
+            print("Upper Hit:", val_range[1])
         results.append(
             (
                 val_range[0],
