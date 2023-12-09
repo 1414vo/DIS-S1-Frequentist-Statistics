@@ -27,7 +27,6 @@ if __name__ == "__main__":
         input_file = sys.argv[1]
     elif len(sys.argv) == 1:
         input_file = "./configs/part_e_config.ini"
-        print(input_file)
     else:
         print("This program accepts only a single command line argument")
         exit()

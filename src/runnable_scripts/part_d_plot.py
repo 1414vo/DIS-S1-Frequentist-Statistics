@@ -1,5 +1,5 @@
 r"""! @file part_d_plot.py
-@brief Plots the two components of the distribution, alongside the
+@brief Plots the two components of the distribution, alongside the combined distribution.
 
 @details Usage: `python -m src.runnable_scripts.part_d_plot <config_file>`.
 Reads in a set of parameters and plots the two components of the distribution,
@@ -18,7 +18,7 @@ if __name__ == "__main__":
     if len(sys.argv) == 2:
         input_file = sys.argv[1]
     elif len(sys.argv) == 1:
-        input_file = "./configs/true_parameters.ini"
+        input_file = "./configs/part_d_config.ini"
     else:
         print("This program accepts only a single command line argument")
         exit()

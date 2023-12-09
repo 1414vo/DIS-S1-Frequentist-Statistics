@@ -11,11 +11,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import scipy.stats as stats
-from src.distribution_utils.distributions import (
-    partial_pdf,
-    normalization_constant,
-    generate_sample,
-)
+from src.distribution_utils.distributions import partial_pdf, normalization_constant
 
 
 def get_bins(X: np.ndarray, n_bins: int):
@@ -62,51 +58,20 @@ def plot_distribution_mix(
         X,
         f * stats.norm.pdf(X, loc=mu, scale=sigma) / norm_constants[0],
         label="Normal component",
+        linestyle="--",
     )
     plt.plot(
         X,
         (1 - f) * stats.expon.pdf(X, scale=1 / lam) / norm_constants[1],
         label="Exponential component",
+        linestyle="--",
     )
     plt.plot(X, total_pdf(X), label="Total probability distribution", alpha=0.5)
+    plt.ylabel("Probability Density")
+    plt.xlabel("M")
+    plt.title("True distribution and its components.")
     plt.legend()
-    plt.show()
-
-
-def plot_samples(
-    f: float,
-    lam: float,
-    mu: float,
-    sigma: float,
-    alpha: float,
-    beta: float,
-    N: int = 100000,
-):
-    r"""! Plots the density of a sample versus the true distribution.
-
-    @param f        The fraction of the distribution attributed to the normal component.
-                    Must be a real number between 0 and 1.
-    @param lam      The \f$\lambda\f$ parameter of the exponential distribution.
-                    Must be a positive number.
-    @param mu       The mean of the normal distribution.
-    @param sigma    The standard deviation of the normal distribution. Must be positive.
-    @param alpha    The lower bound of the distribution. Must be non-negative.
-    @param beta     The upper bound of the distribution. Must be larger than alpha.
-    @param N        The number of samples to be generated.
-    """
-
-    sns.set()
-    X = np.linspace(alpha, beta, 1000)
-
-    total_pdf = partial_pdf(f=f, lam=lam, mu=mu, sigma=sigma, alpha=alpha, beta=beta)
-
-    plt.plot(X, total_pdf(X), label="Total probability distribution", alpha=0.5)
-
-    samples = generate_sample(total_pdf, alpha, beta, N)
-
-    plt.hist(samples, bins=50, label="Sample distribution", density=True)
-
-    plt.legend()
+    plt.tight_layout()
     plt.show()
 
 
@@ -133,24 +98,57 @@ def plot_mle(
     """
 
     sns.set()
+    fig = plt.figure(figsize=(9, 10))
+    gs = fig.add_gridspec(3, hspace=0, height_ratios=[3, 1, 1])
+    axs = gs.subplots(sharex=True)
+    fig.suptitle("Distributions of the sample and estimated fit.")
     X = np.linspace(alpha, beta, 1000)
 
     total_pdf = partial_pdf(f=f, lam=lam, mu=mu, sigma=sigma, alpha=alpha, beta=beta)
+    norm_constants = normalization_constant(f, lam, mu, sigma, alpha, beta)
 
-    plt.plot(X, total_pdf(X), label="Estimated probability distribution")
-
+    axs[0].plot(
+        X, total_pdf(X), label="Estimated probability distribution", color="black"
+    )
+    axs[0].plot(
+        X,
+        f * stats.norm.pdf(X, loc=mu, scale=sigma) / norm_constants[0],
+        label="Estimated normal component",
+        linestyle="--",
+        color="tab:orange",
+    )
+    axs[0].plot(
+        X,
+        (1 - f) * stats.expon.pdf(X, scale=1 / lam) / norm_constants[1],
+        label="Estimated exponential component",
+        linestyle="--",
+        color="tab:green",
+    )
     y, y_err, bin_centers, widths = get_bins(sample, n_bins=100)
-    plt.bar(
+    axs[0].bar(
         bin_centers,
         y,
         width=widths,
-        color="r",
+        color="tab:blue",
         yerr=y_err,
         label="Sample distribution",
-        alpha=0.5,
+        alpha=0.3,
     )
+    axs[0].set_ylabel("Probability Density")
 
-    plt.ylabel("Probability Density")
+    residuals = y - total_pdf(bin_centers)
+    axs[1].errorbar(
+        bin_centers, residuals, yerr=y_err, ls="none", marker=None, ecolor="black"
+    )
+    axs[1].scatter(bin_centers, residuals, s=10, color="black")
+    axs[1].axhline(0, linestyle="--")
+    axs[1].set_ylabel("Residual")
 
-    plt.legend()
+    pull = residuals / y_err
+    axs[2].errorbar(bin_centers, pull, yerr=1, ls="none", marker=None, ecolor="black")
+    axs[2].scatter(bin_centers, pull, s=10, color="black")
+    axs[2].axhline(0, linestyle="--")
+    axs[2].set_ylabel("Pull")
+    plt.xlabel("M")
+    axs[0].legend()
     plt.show()
