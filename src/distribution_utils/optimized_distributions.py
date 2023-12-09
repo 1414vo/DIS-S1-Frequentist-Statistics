@@ -1,4 +1,4 @@
-r"""! @file distributions.py
+r"""! @file optimized_distributions.py
 @brief Contains methods to compute properties of the used distribution using optimized routines.
 
 @details Contains methods to compute and verify properties of the distribution
@@ -254,7 +254,7 @@ def generate_two_signal_distribution_samples(
     @param size         The length of the sample.
     @param random_state The random state seed.
 
-    @return         A sample of size given by the size variable.
+    @return             A sample of size given by the size variable.
     """
     states = (
         range(random_state, random_state + 4)

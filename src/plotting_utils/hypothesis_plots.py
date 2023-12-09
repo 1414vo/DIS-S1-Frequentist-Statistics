@@ -29,8 +29,10 @@ def plot_threshold_search(
     @param threshold    The T2 error threshold.
     @param n_iter       The number of iterations done per hypothesis test."""
 
+    plt.figure(figsize=(10, 6), dpi=150)
+
     # We have different elements for whether the search that was done was the binary search method
-    is_binary_search = len(results[0]) == 2
+    is_binary_search = len(results[0][0]) == 2
 
     x = np.array([res[0] for res in results[0]])
     y = np.array([res[1] for res in results[0]])
@@ -73,7 +75,7 @@ def plot_threshold_search(
 
     plt.ylabel("-log(T2 Error)")
     plt.xlabel("Number of samples")
-    plt.title("Search")
+    plt.title("Distribution of T2 Errors of sampled dataset sizes")
     plt.tight_layout()
     plt.legend()
     plt.show()
@@ -173,6 +175,8 @@ def plot_t_statistic_distribution(
         )
 
     plt.xlabel("Log-Likelihood Ratio")
+    plt.xlim(0, 120)
+    plt.ylim(0, 0.4)
     plt.ylabel("Test statistic probability density")
     plt.title("Test statistic distributions for different dataset sizes")
     plt.legend(bbox_to_anchor=(1, 1, 0, 0.0))
