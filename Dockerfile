@@ -10,5 +10,3 @@ RUN apt-get update && apt-get install -y \
 RUN conda env update --file environment.yml --name base
 
 RUN pre-commit install
-
-EXPOSE 8888

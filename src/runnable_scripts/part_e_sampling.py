@@ -79,7 +79,7 @@ if __name__ == "__main__":
 
     for param in params:
         print(
-            f"Estimated value for {param}: {values[param]:.3f} \u00B1 {errors[param]:.3f}"
+            f"Estimated value for {param}: {values[param]:.3f} \u00B1 {errors[param]:.5f}"
         )
 
     # Plot estimated distribution.
@@ -91,4 +91,5 @@ if __name__ == "__main__":
         sigma=values["sigma"],
         alpha=values["alpha"],
         beta=values["beta"],
+        save_path="./part_e.png",
     )

@@ -7,6 +7,7 @@ Includes plotting the true distribution or the estimated one from a sample.
 @author Created by I. Petrov on 29/11/2023
 """
 
+import os
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -32,20 +33,27 @@ def get_bins(X: np.ndarray, n_bins: int):
 
 
 def plot_distribution_mix(
-    f: float, lam: float, mu: float, sigma: float, alpha: float, beta: float
+    f: float,
+    lam: float,
+    mu: float,
+    sigma: float,
+    alpha: float,
+    beta: float,
+    save_path: str = None,
 ):
     r"""! Plots the overlay of the pdf and the 2 components of the distribution:
     \f$p(M; f,\lambda,\mu,\sigma) = fs(M;\mu, \sigma) + (1-f)b(M; \lambda)\f$.
 
-    @param M        A value or iterable of observations
-    @param f        The fraction of the distribution attributed to the normal component.
-                    Must be a real number between 0 and 1.
-    @param lam      The \f$\lambda\f$ parameter of the exponential distribution.
-                    Must be a positive number.
-    @param mu       The mean of the normal distribution.
-    @param sigma    The standard deviation of the normal distribution. Must be positive.
-    @param alpha    The lower bound of the distribution. Must be non-negative.
-    @param beta     The upper bound of the distribution. Must be larger than alpha.
+    @param M            A value or iterable of observations
+    @param f            The fraction of the distribution attributed to the normal component.
+                        Must be a real number between 0 and 1.
+    @param lam          The \f$\lambda\f$ parameter of the exponential distribution.
+                        Must be a positive number.
+    @param mu           The mean of the normal distribution.
+    @param sigma        The standard deviation of the normal distribution. Must be positive.
+    @param alpha        The lower bound of the distribution. Must be non-negative.
+    @param beta         The upper bound of the distribution. Must be larger than alpha.
+    @param save_path    Where to save the plot.
     """
 
     sns.set()
@@ -54,6 +62,7 @@ def plot_distribution_mix(
     total_pdf = partial_pdf(f=f, lam=lam, mu=mu, sigma=sigma, alpha=alpha, beta=beta)
     norm_constants = normalization_constant(f, lam, mu, sigma, alpha, beta)
 
+    plt.figure(dpi=300)
     plt.plot(
         X,
         f * stats.norm.pdf(X, loc=mu, scale=sigma) / norm_constants[0],
@@ -70,9 +79,12 @@ def plot_distribution_mix(
     plt.ylabel("Probability Density")
     plt.xlabel("M")
     plt.title("True distribution and its components.")
-    plt.legend()
+    plt.legend(prop={"size": 9})
     plt.tight_layout()
-    plt.show()
+
+    if save_path is not None:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.savefig(save_path)
 
 
 def plot_mle(
@@ -83,22 +95,24 @@ def plot_mle(
     sigma: float,
     alpha: float,
     beta: float,
+    save_path: str = None,
 ):
     r"""! Plots the density of a sample versus the estimated distribution.
 
-    @param sample   The sample used for the estimation.
-    @param f        The estimated fraction of the distribution attributed to the normal component.
-                    Must be a real number between 0 and 1.
-    @param lam      The estimated \f$\lambda\f$ parameter of the exponential distribution.
-                    Must be a positive number.
-    @param mu       The estimated mean of the normal distribution.
-    @param sigma    The estimated standard deviation of the normal distribution. Must be positive.
-    @param alpha    The lower bound of the distribution. Must be non-negative.
-    @param beta     The upper bound of the distribution. Must be larger than alpha.
+    @param sample       The sample used for the estimation.
+    @param f            The estimated fraction of the distribution attributed to the normal component.
+                        Must be a real number between 0 and 1.
+    @param lam          The estimated \f$\lambda\f$ parameter of the exponential distribution.
+                        Must be a positive number.
+    @param mu           The estimated mean of the normal distribution.
+    @param sigma        The estimated standard deviation of the normal distribution. Must be positive.
+    @param alpha        The lower bound of the distribution. Must be non-negative.
+    @param beta         The upper bound of the distribution. Must be larger than alpha.
+    @param save_path    Where to save the plot.
     """
 
     sns.set()
-    fig = plt.figure(figsize=(9, 10))
+    fig = plt.figure(figsize=(12, 8), dpi=300)
     gs = fig.add_gridspec(3, hspace=0, height_ratios=[3, 1, 1])
     axs = gs.subplots(sharex=True)
     fig.suptitle("Distributions of the sample and estimated fit.")
@@ -107,6 +121,7 @@ def plot_mle(
     total_pdf = partial_pdf(f=f, lam=lam, mu=mu, sigma=sigma, alpha=alpha, beta=beta)
     norm_constants = normalization_constant(f, lam, mu, sigma, alpha, beta)
 
+    # Display estimated distributions
     axs[0].plot(
         X, total_pdf(X), label="Estimated probability distribution", color="black"
     )
@@ -124,6 +139,7 @@ def plot_mle(
         linestyle="--",
         color="tab:green",
     )
+    # Display sample
     y, y_err, bin_centers, widths = get_bins(sample, n_bins=100)
     axs[0].bar(
         bin_centers,
@@ -136,6 +152,7 @@ def plot_mle(
     )
     axs[0].set_ylabel("Probability Density")
 
+    # Produce the residual plot
     residuals = y - total_pdf(bin_centers)
     axs[1].errorbar(
         bin_centers, residuals, yerr=y_err, ls="none", marker=None, ecolor="black"
@@ -144,6 +161,7 @@ def plot_mle(
     axs[1].axhline(0, linestyle="--")
     axs[1].set_ylabel("Residual")
 
+    # Produce the pull plot
     pull = residuals / y_err
     axs[2].errorbar(bin_centers, pull, yerr=1, ls="none", marker=None, ecolor="black")
     axs[2].scatter(bin_centers, pull, s=10, color="black")
@@ -151,4 +169,7 @@ def plot_mle(
     axs[2].set_ylabel("Pull")
     plt.xlabel("M")
     axs[0].legend()
-    plt.show()
+
+    if save_path is not None:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.savefig(save_path)

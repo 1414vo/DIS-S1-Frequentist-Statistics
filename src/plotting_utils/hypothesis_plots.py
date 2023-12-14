@@ -12,6 +12,7 @@ sampled values with their associated errors.
 
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 from typing import Tuple, List, Dict
 from scipy.stats import chi2
@@ -20,14 +21,18 @@ from sklearn.cluster import KMeans
 
 
 def plot_threshold_search(
-    results: Tuple[List, List, List], threshold: float, n_iter: int = 1000
+    results: Tuple[List, List, List],
+    threshold: float,
+    n_iter: int = 1000,
+    save_path: str = None,
 ) -> None:
     """! Visualizes the search algorithm for finding the dataset size corresponding to a T2 error threshold.
 
     @param results      A tuple of 1) A list of dataset sizes, 2) The corresponding T2 error rate,
     3) If using the weighted search algorithm, the Poisson p-values for each data point.
     @param threshold    The T2 error threshold.
-    @param n_iter       The number of iterations done per hypothesis test."""
+    @param n_iter       The number of iterations done per hypothesis test.
+    @param save_path    Where to save the plot."""
 
     plt.figure(figsize=(10, 6), dpi=150)
 
@@ -78,7 +83,10 @@ def plot_threshold_search(
     plt.title("Distribution of T2 Errors of sampled dataset sizes")
     plt.tight_layout()
     plt.legend()
-    plt.show()
+
+    if save_path is not None:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.savefig(save_path)
 
 
 def __select_samples(size_samples: np.ndarray, n_samples: int = 4) -> List[int]:
@@ -114,13 +122,15 @@ def plot_t_statistic_distribution(
     h1_distributions: Dict[int, List[float]],
     t1_error_rate: float,
     t2_error_rate: float,
+    save_path: str = None,
 ) -> None:
     """! Visualizes the obtained test statistic distributions after a search has been executed.
 
     @param h0_distribution  Data points obtained from generating the test statistic under the null hypothesis.
     @param h1_distributions Data points obtained from generating the test statistic under the alternate hypothesis.
     @param t1_error_rate    The Type 1 error threshold.
-    @param t2_error_rate    The Type 2 error threshold."""
+    @param t2_error_rate    The Type 2 error threshold.
+    @param save_path        Where to save the plot."""
     plt.figure(figsize=(10, 6), dpi=150)
 
     # Fit a Chi-squared distribution for the H0 distribution
@@ -181,4 +191,7 @@ def plot_t_statistic_distribution(
     plt.title("Test statistic distributions for different dataset sizes")
     plt.legend(bbox_to_anchor=(1, 1, 0, 0.0))
     plt.tight_layout()
-    plt.show()
+
+    if save_path is not None:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.savefig(save_path)

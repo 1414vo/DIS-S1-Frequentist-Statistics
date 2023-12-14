@@ -40,10 +40,9 @@ if __name__ == "__main__":
         input_file = sys.argv[1]
     elif len(sys.argv) == 1:
         input_file = "./configs/part_g_config.ini"
-        print(input_file)
     else:
         print("This program accepts only a single command line argument")
-        exit()
+        exit(1)
 
     config = cfg.ConfigParser()
 
@@ -57,21 +56,23 @@ if __name__ == "__main__":
     if "Parameters" not in config.sections():
         msg = f"Could not read section 'Parameters' from file {input_file}."
         print(msg)
-        exit()
+        exit(1)
 
     # Read in the set of parameters
     for param_name in ["f1", "f2", "lam", "mu1", "mu2", "sigma", "alpha", "beta"]:
         if param_name not in config["Parameters"]:
             print(f"No parameter called {param_name} was found - terminating.")
-            exit()
+            exit(1)
         params[param_name] = config.getfloat("Parameters", param_name)
 
     # Read in the set of parameters for the null hypothesis
     for param_name in ["lam", "alpha", "beta", "sigma"]:
         if param_name not in config["Parameters"]:
             print(f"No parameter called {param_name} was found - terminating.")
-            exit()
+            exit(1)
         null_params[param_name] = config.getfloat("Parameters", param_name)
+
+    # Infer stronger signal for generation
     null_params["f"] = max(params["f1"], params["f2"])
     if null_params["f"] == params["f1"]:
         null_params["mu"] = params["mu1"]
@@ -194,7 +195,7 @@ if __name__ == "__main__":
             f"The number of data points required is likely to lie in the range ({results[1][0]}, {results[1][1]})"
         )
 
-    plot_threshold_search(results, t2_error_rate)
+    plot_threshold_search(results, t2_error_rate, save_path="./part_g_search.png")
 
     hypothesis_distributions = results[2]
     h0_distribution = []
@@ -210,5 +211,9 @@ if __name__ == "__main__":
         & (h0_distribution < np.quantile(h0_distribution, 0.99))
     ]
     plot_t_statistic_distribution(
-        h0_distribution, h1_distributions, t1_error_rate, t2_error_rate
+        h0_distribution,
+        h1_distributions,
+        t1_error_rate,
+        t2_error_rate,
+        save_path="./part_g_distributions.png",
     )

@@ -40,4 +40,4 @@ if __name__ == "__main__":
             exit()
     print(params)
 
-    plot_distribution_mix(*params)
+    plot_distribution_mix(*params, save_path="./part_d.png")
