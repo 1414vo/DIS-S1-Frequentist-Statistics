@@ -29,7 +29,7 @@ The setup image will also add the necessary pre-commit checks to your git reposi
 
 Afterwards, any time you want to use the code, you can launch a Docker container using:
 
-```docker run --rm -ti ivp24_pds```
+```docker run --rm --name pds -ti ivp24_pds```
 
 If you want to make changes to the repository, you would likely need to use your Git credentials. A safe way to load your SSH keys was to use the following command:
 
@@ -38,6 +38,10 @@ If you want to make changes to the repository, you would likely need to use your
 This copies your keys to the created container and you should be able to run all required git commands.
 
 ## Running the scripts
+All scripts can be run in a similar way, as shown below. No configuration files have to be specified for the scripts, as the default parameters are used if no configuration is passed. All plots produced by the scripts can be viewed by attaching the container to a Visual Studio Code instance, or by copying to the local machine through the command:
+
+```docker cp pds:/ivp24/<image_name> <destination>```
+
 
 ### Part (c)
 
