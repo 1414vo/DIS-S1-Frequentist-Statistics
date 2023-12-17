@@ -3,7 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - python==3.9.18
-  - conda==23.10.0
+  - conda==23.11.0
   - setuptools
   - pip
   - wheel
@@ -20,4 +20,6 @@ dependencies:
   - iminuit
   - ipykernel
   - numba-stats
+  - line_profiler
+  - scikit-learn
 prefix: /opt/conda
