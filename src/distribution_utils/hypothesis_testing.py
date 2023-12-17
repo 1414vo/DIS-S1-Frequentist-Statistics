@@ -390,7 +390,6 @@ def weighted_threshold_search(
             <= t2_error_rate * n_iter
         ):
             lower_hit = True
-            print("Lower Hit:", val_range[0])
 
         # Check if the upper limit's range covers the threshold
         if (
@@ -398,7 +397,6 @@ def weighted_threshold_search(
             <= high_score * n_iter + (t2_error_rate * n_iter) ** 0.5
         ):
             upper_hit = True
-            print("Upper Hit:", val_range[1])
 
         # Store the sampling results
         results.append(
