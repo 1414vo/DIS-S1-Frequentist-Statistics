@@ -2,8 +2,7 @@
 
 This repository contains a solution for the PDS coursework assignment.
 
-![Static Badge](https://img.shields.io/badge/build-incomplete-orange)
-![Static Badge](https://img.shields.io/badge/logo-gitlab-blue?logo=gitlab)
+![Static Badge](https://img.shields.io/badge/build-stable-green) ![Static Badge](https://img.shields.io/badge/logo-gitlab-blue?logo=gitlab)
 
 ## Table of contents
 1. [Requirements](#requirements)
@@ -69,11 +68,11 @@ as well as the (unnormalized) components of the estimate.
 ### Parts (f, g)
 In order to run the script for the relevant parts, execute the following command while still in the main project directory:
 
-```python -m src.runnable_scripts.part_f_ht <config_file>``` for Part (f) or
-```python -m src.runnable_scripts.part_g_ht <config_file>``` for Part (g)
+```python -W ignore -m src.runnable_scripts.part_f_ht <config_file>``` for Part (f) or
 
-A sample configuration file can be found in the `configs` folder. If a configuration is not specified, the default one will be used. The features
-of the configuration are displayed below. If correctly executed, the program will give either a possible range for the number of data points to differentiate the hypotheses, or a conrete value (which might have a high uncertainty). It will then produce plots for the fit procedure and show examples of different test statistic distributions for a range of dataset sizes.
+```python -W ignore -m src.runnable_scripts.part_g_ht <config_file>``` for Part (g)
+
+We recommend using the ignore warnings tag in the occasions that fits become invalid. A sample configuration file can be found in the `configs` folder. If a configuration is not specified, the default one will be used. The features of the configuration are displayed below. If correctly executed, the program will give either a possible range for the number of data points to differentiate the hypotheses, or a conrete value (which might have a high uncertainty). It will then produce plots for the fit procedure and show examples of different test statistic distributions for a range of dataset sizes.
 ## Features
 While the implementations of parts (c), (d) and (e) are relatively straightforward, the configurations of (f) and (g) need to be explored further:
 ### Parameters
